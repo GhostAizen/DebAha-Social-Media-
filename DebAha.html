@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeHive - Hacker Social Network</title>
+    <style>
+        /* Base styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #00ff00;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Terminal-like styling */
+        .terminal {
+            background-color: #0a0a0a;
+            border: 1px solid #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px;
+            position: relative;
+        }
+
+        .terminal::before {
+            content: ">";
+            position: absolute;
+            left: 5px;
+            top: 15px;
+            color: #00ff00;
+        }
+
+        /* Header styling */
+        header {
+            background-color: #0a0a0a;
+            border-bottom: 1px solid #00ff00;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .logo span {
+            color: #ff6600;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            color: #00ff00;
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+        }
+
+        nav ul li a:hover {
+            border: 1px solid #00ff00;
+            background-color: rgba(0, 255, 0, 0.1);
+        }
+
+        /* Main content area */
+        .container {
+            display: flex;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .sidebar {
+            flex: 0 0 250px;
+            margin-right: 20px;
+        }
+
+        .main-content {
+            flex: 1;
+        }
+
+        /* Post styling */
+        .post {
+            background-color: #111;
+            border: 1px solid #333;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .post-header {
+            padding: 15px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+        }
+
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #00ff00;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .post-user {
+            font-weight: bold;
+        }
+
+        .post-time {
+            color: #666;
+            font-size: 12px;
+            margin-left: auto;
+        }
+
+        .post-content {
+            padding: 15px;
+        }
+
+        .post-actions {
+            padding: 10px 15px;
+            border-top: 1px solid #333;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .post-action {
+            color: #666;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .post-action:hover {
+            color: #00ff00;
+        }
+
+        /* Form styling */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: #111;
+            border: 1px solid #333;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 3px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #00ff00;
+            box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
+
+        .btn {
+            background-color: #111;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 3px;
+        }
+
+        .btn:hover {
+            background-color: rgba(0, 255, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        /* Login modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #111;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            width: 400px;
+            max-width: 90%;
+            padding: 20px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #00ff00;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Typing animation */
+        .typing {
+            overflow: hidden;
+            border-right: 2px solid #00ff00;
+            white-space: nowrap;
+            margin: 0 auto;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #00ff00 }
+        }
+
+        /* Matrix effect background */
+        #matrix {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix background effect -->
+    <canvas id="matrix"></canvas>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">DebAha<span>Cyber</span></div>
+        <nav>
+            <ul>
+                <li><a href="#" id="home-link">Home</a></li>
+                <li><a href="#" id="explore-link">Explore</a></li>
+                <li><a href="#" id="messages-link">Messages</a></li>
+                <li><a href="#" id="profile-link">Profile</a></li>
+                <li><a href="#" id="login-link">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main content -->
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="terminal">
+                <h3>User Stats</h3>
+                <p>Followers: 127</p>
+                <p>Following: 89</p>
+                <p>Posts: 42</p>
+                <p>Reputation: 850</p>
+            </div>
+
+            <div class="terminal">
+                <h3>Trending Topics</h3>
+                <ul>
+                    <li>#EthicalHacking</li>
+                    <li>#BugBounty</li>
+                    <li>#CyberSecurity</li>
+                    <li>#PythonScripts</li>
+                    <li>#CTF2023</li>
+                </ul>
+            </div>
+
+            <div class="terminal">
+                <h3>Online Friends</h3>
+                <p>WhiteHat_42</p>
+                <p>CryptoQueen</p>
+                <p>ZeroDayHunter</p>
+                <p>CodeBreaker</p>
+            </div>
+        </div>
+
+        <!-- Main content area -->
+        <div class="main-content">
+            <!-- Create post -->
+            <div class="post">
+                <div class="post-header">
+                    <div class="post-avatar">U</div>
+                    <div class="post-user">Create New Post</div>
+                </div>
+                <div class="post-content">
+                    <textarea class="form-control" rows="3" placeholder="What's on your mind, hacker?"></textarea>
+                    <div class="form-group">
+                        <input type="file" id="post-file" class="form-control">
+                    </div>
+                    <button class="btn">Post</button>
+                </div>
+            </div>
+
+            <!-- Sample posts -->
+            <div class="post">
+                <div class="post-header">
+                    <div class="post-avatar">W</div>
+                    <div class="post-user">WhiteHat_42</div>
+                    <div class="post-time">2 hours ago</div>
+                </div>
+                <div class="post-content">
+                    <p>Just discovered a critical vulnerability in a popular CMS. Responsible disclosure process initiated. #BugBounty #EthicalHacking</p>
+                    <div class="terminal" style="margin-top: 10px;">
+                        <p>Vulnerability: SQL Injection</p>
+                        <p>Severity: Critical</p>
+                        <p>Status: Reported</p>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <div class="post-action">Like</div>
+                    <div class="post-action">Comment</div>
+                    <div class="post-action">Share</div>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="post-header">
+                    <div class="post-avatar">C</div>
+                    <div class="post-user">CryptoQueen</div>
+                    <div class="post-time">5 hours ago</div>
+                </div>
+                <div class="post-content">
+                    <p>New encryption algorithm I've been working on. Feedback welcome!</p>
+                    <div class="terminal" style="margin-top: 10px;">
+                        <pre>
+function encrypt(data, key) {
+    // Custom encryption logic
+    let result = "";
+    for (let i = 0; i < data.length; i++) {
+        result += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return btoa(result);
+}
+                        </pre>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <div class="post-action">Like</div>
+                    <div class="post-action">Comment</div>
+                    <div class="post-action">Share</div>
+                </div>
+            </div>
+
+            <div class="post">
+                <div class="post-header">
+                    <div class="post-avatar">Z</div>
+                    <div class="post-user">ZeroDayHunter</div>
+                    <div class="post-time">1 day ago</div>
+                </div>
+                <div class="post-content">
+                    <p>CTF competition this weekend. Who's participating? #CTF2023 #CyberSecurity</p>
+                    <div class="terminal" style="margin-top: 10px;">
+                        <p>Event: Global CTF Challenge 2023</p>
+                        <p>Date: October 14-15</p>
+                        <p>Categories: Web, Crypto, Forensics, Pwn</p>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <div class="post-action">Like</div>
+                    <div class="post-action">Comment</div>
+                    <div class="post-action">Share</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 class="typing">Access CodeHive</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" placeholder="Password" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn">Login</button>
+                </div>
+                <p>New to CodeHive? <a href="#" style="color: #00ff00;">Create Account</a></p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Matrix background effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$+-*/=%"\'#&_(),.;:?!\\|{}<>[]^~';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+
+        const drops = [];
+        for (let i = 0; i < columns; i++) {
+            drops[i] = 1;
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00ff00';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = letters[Math.floor(Math.random() * letters.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 33);
+
+        // Modal functionality
+        const loginModal = document.getElementById('login-modal');
+        const loginLink = document.getElementById('login-link');
+        const closeModal = document.querySelector('.close-modal');
+
+        loginLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            loginModal.style.display = 'flex';
+        });
+
+        closeModal.addEventListener('click', function() {
+            loginModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function(e) {
+            if (e.target === loginModal) {
+                loginModal.style.display = 'none';
+            }
+        });
+
+        // Form submission
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Login functionality would be implemented here');
+            loginModal.style.display = 'none';
+        });
+
+        // Post actions
+        document.querySelectorAll('.post-action').forEach(action => {
+            action.addEventListener('click', function() {
+                const actionText = this.textContent;
+                alert(`${actionText} functionality would be implemented here`);
+            });
+        });
+
+        // Responsive canvas
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
